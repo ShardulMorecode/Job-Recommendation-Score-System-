@@ -94,17 +94,17 @@ def match():
                 "education_match": int(round(scores["education"], 0)),
                 "overall_score": int(round(scores["overall"], 0)),
             },
-            "explanations": {
-                "jd_skills": sorted(jd_struct.get("skills", [])),
-                "resume_skills": sorted(details.get("resume_skills_norm", [])),
-                "skills_matched": sorted(details.get("skills_matched", [])),
-                "skills_missing": sorted(details.get("skills_missing", [])),
-                "jd_min_exp_years": jd_struct.get("min_years_experience"),
-                "resume_years_experience": details.get("resume_years_experience"),
-                "jd_education": jd_struct.get("education"),
-                "resume_degrees": details.get("resume_degrees"),
-                "used_semantic": details.get("used_semantic", False),
-            }
+            ###"explanations": {
+            ###    "jd_skills": sorted(jd_struct.get("skills", [])),
+            ###    "resume_skills": sorted(details.get("resume_skills_norm", [])),
+            ###    "skills_matched": sorted(details.get("skills_matched", [])),
+            ###    "skills_missing": sorted(details.get("skills_missing", [])),
+            ###    "jd_min_exp_years": jd_struct.get("min_years_experience"),
+            ###    "resume_years_experience": details.get("resume_years_experience"),
+            ###    "jd_education": jd_struct.get("education"),
+            ###    "resume_degrees": details.get("resume_degrees"),
+            ###    "used_semantic": details.get("used_semantic", False),
+            ###} 
         }
 
         logger.info(f"Match computed for '{response['candidate_name']}' -> overall {response['match_scores']['overall_score']}")
