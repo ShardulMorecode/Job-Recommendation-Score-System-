@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Job Recommendation Score System</title>
+  <style>
+    body { font-family: system-ui, Arial; margin: 24px; }
+    .card { max-width: 900px; padding: 18px; border:1px solid #ddd; border-radius:10px; }
+    label { display:block; margin-top:10px; font-weight:600; }
+    textarea { width:100%; height:140px; }
+    input[type="file"] { margin-top:6px; }
+    button { margin-top:12px; padding:10px 14px; border-radius:8px; border:0; background:#111; color:#fff; cursor:pointer; }
+    pre { background:#f4f6f8; padding:12px; border-radius:8px; overflow:auto; }
+    .hint { color:#666; font-size:13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Job Recommendation Score System</h2>
+
+    <label>Resume (PDF/DOCX/TXT)</label>
+    <input id="resume" type="file" accept=".pdf,.docx,.txt" />
+
+    <label>Job Description (paste)</label>
+    <textarea id="jd_text" placeholder="Paste the JD here..."></textarea>
+    <div class="hint">Or upload a JD file:</div>
+    <input id="jd_file" type="file" accept=".pdf,.docx,.txt" />
+
+    <label>Use semantic matching</label>
+    <select id="use_semantic">
+      <option value="">Auto</option>
+      <option value="true">Yes</option>
+      <option value="false">No</option>
+    </select>
+
+    <div>
+      <button id="submitBtn">Compute Match</button>
+    </div>
+
+    <h3>Result</h3>
+    <div id="status" style="color:#333; font-weight:600;"></div>
+    <pre id="result">No result yet.</pre>
+  </div>
+
+  <script>
+    const submitBtn = document.getElementById('submitBtn');
+    const resumeInput = document.getElementById('resume');
+    const jdInput = document.getElementById('jd_file');
+    const jdText = document.getElementById('jd_text');
+    const useSemantic = document.getElementById('use_semantic');
+    const status = document.getElementById('status');
+    const result = document.getElementById('result');
+
+    submitBtn.addEventListener('click', async () => {
+      status.textContent = 'Sending request...';
+      result.textContent = '';
+
+      if (!resumeInput.files.length) {
+        status.textContent = 'Please select a resume file.';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('resume', resumeInput.files[0]);
+
+      if (jdInput.files.length) {
+        formData.append('jd_file', jdInput.files[0]);
+      } else if (jdText.value.trim()) {
+        formData.append('jd_text', jdText.value);
+      } else {
+        status.textContent = 'Please paste JD text or upload a JD file.';
+        return;
+      }
+
+      if (useSemantic.value) {
+        formData.append('use_semantic', useSemantic.value);
+      }
+
+      try {
+        const resp = await fetch('/match', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const ct = resp.headers.get('content-type') || '';
+        if (!resp.ok) {
+          // try to parse JSON error body
+          let body = '';
+          if (ct.includes('application/json')) {
+            body = await resp.json();
+            result.textContent = JSON.stringify(body, null, 2);
+          } else {
+            body = await resp.text();
+            result.textContent = body;
+          }
+          status.textContent = `Error ${resp.status}: ${resp.statusText}`;
+          return;
+        }
+
+        if (ct.includes('application/json')) {
+          const json = await resp.json();
+          result.textContent = JSON.stringify(json, null, 2);
+          status.textContent = 'Success';
+        } else {
+          const txt = await resp.text();
+          result.textContent = txt;
+          status.textContent = 'Success (non-JSON)';
+        }
+      } catch (err) {
+        status.textContent = 'Network or client error: ' + err;
+        result.textContent = err.stack || String(err);
+      }
+    });
+  </script>
+</body>
+</html>
