@@ -41,8 +41,7 @@ Resume: samples/sample_resume.pdf
 
 Job Description: samples/sample_jd.txt
 
-Output JSON:
-See: samples/sample_output.json
+Output as JSON on webpage
 
 ## 📝 Assumptions
 
